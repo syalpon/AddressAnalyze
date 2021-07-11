@@ -18,8 +18,6 @@ void addnode(DataTypes **,char *,char );
 void freelist(DataTypes **);
 void savelist(FILE *,DataTypes **);
 
-
-
 typedef enum FILE_NAME_T{
     FPI,
     FPO,
