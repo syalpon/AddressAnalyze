@@ -57,30 +57,83 @@ int main(void){
 
 void func(FILE **fpl,int size){
     int  kakko_counter = 0;
+    int  i;
     char buff[128];
+    char mozi;
     bool flag = false;
     DataTypes *datatype = NULL;
 
     /*コピー*/
-    while( fgets(buff,128,fpl[FPI])!=NULL ){
-        if( strstr(buff,"struct") != NULL || strstr(buff,"union") != NULL ){
-            flag = true;
-        }
+    i = 0;
+    while( (mozi=fgetc(fpl[FPI])) != EOF ){
+        if( mozi != ' ' && mozi != '\t' && mozi != '\n'){
+            buff[i] = mozi;
+            i++;
+            continue;
+        }else{
+            if(i == 0){
+                
+            }else{
+                buff[i] = '\0';
+                i = 0;
+                /*typedefから;までを表示*/
+                if(strcmp(buff,"typedef") == 0){
+                    flag = true;
+                    continue;
+                }
 
-        if( strstr(buff,"{") != NULL ){
-            kakko_counter++;
-        }
+                /*{カウント*/
+                if(strstr(buff,"{")!=NULL){
+                    kakko_counter++;
+                }
+                /*}カウント*/
+                if(strstr(buff,"}")!=NULL){
+                    kakko_counter--;
+                }
 
-        if(flag && kakko_counter>0 ){
-            fprintf(fpl[FPO],"%s",buff);
-        }
-        
-        if(kakko_counter == 0){
-            flag = false;
-        }
+                /*typedefに対する;があれば書き込み終了*/
+                if(strcmp(buff,";") == 0){
+                    flag = false;
+                    fprintf(fpl[FPO],"\n");
+                    continue;
+                }
+                
+                /*unsignedはサイズ関係ないので無視*/
+                if(strcmp(buff,"unsigned") == 0){
+                    continue;
+                }
 
-        if( strstr(buff,"}") != NULL ){
-            kakko_counter--;
+                /*サイズ判定*/
+                if(strcmp(buff,"char") == 0){
+                    fprintf(fpl[FPO],"1 : ");
+                    continue;
+                }
+                if(strcmp(buff,"short") == 0){
+                    fprintf(fpl[FPO],"2 : ");
+                    continue;
+                }
+                if(strcmp(buff,"int") == 0){
+                    fprintf(fpl[FPO],"4 : ");
+                    continue;
+                }
+                if(strcmp(buff,"long") == 0){
+                    fprintf(fpl[FPO],"4 : ");
+                    continue;
+                }
+                if(strcmp(buff,"float") == 0){
+                    fprintf(fpl[FPO],"4 : ");
+                    continue;
+                }
+                if(strcmp(buff,"double") == 0){
+                    fprintf(fpl[FPO],"8 : ");
+                    continue;
+                }
+
+                if(flag){
+                    fprintf(fpl[FPO],"%s\n",buff);
+                }
+            }
+            
         }
     }
 }
